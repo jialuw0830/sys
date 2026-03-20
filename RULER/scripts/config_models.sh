@@ -30,6 +30,21 @@ MODEL_SELECT() {
     ENGINE_DIR=$3
     
     case $MODEL_NAME in
+        qwen3.5-9b)
+            MODEL_PATH="${MODEL_DIR}/Qwen3.5-9B"
+            MODEL_TEMPLATE_TYPE="qwen-chat"
+            MODEL_FRAMEWORK="vllm"
+            ;;
+        qwen3.5-27b)
+            MODEL_PATH="${MODEL_DIR}/Qwen3.5-27B"
+            MODEL_TEMPLATE_TYPE="qwen-chat"
+            MODEL_FRAMEWORK="vllm"
+            ;;
+        glm-4.7-flash)
+            MODEL_PATH="${MODEL_DIR}/GLM-4.7-Flash"
+            MODEL_TEMPLATE_TYPE="chatglm-chat"
+            MODEL_FRAMEWORK="vllm"
+            ;;
         llama2-7b-chat)
             MODEL_PATH="${MODEL_DIR}/llama2-7b-chat-hf"
             MODEL_TEMPLATE_TYPE="meta-chat"

@@ -15,6 +15,8 @@
 Templates = {
     'base': "{task_template}",
 
+    'qwen-chat': "<|im_start|>user\n{task_template}<|im_end|>\n<|im_start|>assistant\n",
+
     'meta-chat': "[INST] {task_template} [/INST]",
 
     'vicuna-chat': "A chat between a curious user and an artificial intelligence assistant. The assistant gives helpful, detailed, and polite answers to the user's questions. USER: {task_template} ASSISTANT:",

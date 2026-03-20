@@ -24,14 +24,15 @@ ANTHROPIC_MODELS = ['claude-2']
 LOCAL_MODELS = ['qwen3.5-9b-local', 'qwen3.5-27b-local', 'GLM-4.7-Flash', 'glm-4.7-flash-local']
 Example = namedtuple('Example', ['question', 'choice1', 'choice2', 'choice3', 'choice4', 'correct_index'])
 
-LOCAL_MODEL_PATH = os.getenv("LOCAL_MODEL_PATH", "/home/rzh/models/Qwen3.5-9B")
+LOCAL_MODEL_PATH = os.getenv("LOCAL_MODEL_PATH", "/home/cc/models/Qwen3.5-9B")
 LOCAL_MODEL_PATHS = {
-    'qwen3.5-9b-local': os.getenv("LOCAL_MODEL_PATH_QWEN3_5_9B", "/home/rzh/models/Qwen3.5-9B"),
-    'qwen3.5-27b-local': os.getenv("LOCAL_MODEL_PATH_QWEN3_5_27B", "/home/rzh/models/Qwen3.5-27B"),
-    'GLM-4.7-Flash': os.getenv("LOCAL_MODEL_PATH_GLM_4_7_FLASH", "/home/rzh/models/GLM-4.7-Flash"),
-    'glm-4.7-flash-local': os.getenv("LOCAL_MODEL_PATH_GLM_4_7_FLASH", "/home/rzh/models/GLM-4.7-Flash"),
+    'qwen3.5-9b-local': os.getenv("LOCAL_MODEL_PATH_QWEN3_5_9B", "/home/cc/models/Qwen3.5-9B"),
+    'qwen3.5-27b-local': os.getenv("LOCAL_MODEL_PATH_QWEN3_5_27B", "/home/cc/models/Qwen3.5-27B"),
+    'GLM-4.7-Flash': os.getenv("LOCAL_MODEL_PATH_GLM_4_7_FLASH", "/home/cc/models/GLM-4.7-Flash"),
+    'glm-4.7-flash-local': os.getenv("LOCAL_MODEL_PATH_GLM_4_7_FLASH", "/home/cc/models/GLM-4.7-Flash"),
 }
-LOCAL_DEEPSPEED_PATH = os.getenv("DEEPSPEED_LOCAL_PATH", "/home/rzh/jialu/sys/DeepSpeed")
+_SYS_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+LOCAL_DEEPSPEED_PATH = os.getenv("DEEPSPEED_LOCAL_PATH", os.path.join(_SYS_ROOT, "DeepSpeed"))
 _local_tokenizer = None
 _local_model = None
 _local_flops_profiler = None

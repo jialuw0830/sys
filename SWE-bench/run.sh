@@ -1,5 +1,6 @@
 export CUDA_VISIBLE_DEVICES=5
-vllm serve /home/rzh/models/Qwen3.5-9B \
+MODEL_PATH=${MODEL_PATH:-$HOME/models/Qwen3.5-9B}
+vllm serve "$MODEL_PATH" \
   --served-model-name qwen3.5-9b \
   --api-key token-abc123 \
   --host 127.0.0.1 \

@@ -1,8 +1,8 @@
 {
     "GLM-4-9B-Chat": "THUDM/glm-4-9b-chat",
-    "Qwen3.5-9B-Instruct": "/home/rzh/models/Qwen3.5-9B",
-    "Qwen3.5-27B-Instruct": "/home/rzh/models/Qwen3.5-27B",
-    "GLM-4.7-Flash": "/home/rzh/models/GLM-4.7-Flash",
+    "Qwen3.5-9B-Instruct": "/home/cc/models/Qwen3.5-9B",
+    "Qwen3.5-27B-Instruct": "/home/cc/models/Qwen3.5-27B",
+    "GLM-4.7-Flash": "/home/cc/models/GLM-4.7-Flash",
     "Llama-3.1-8B-Instruct": "meta-llama/Llama-3.1-8B-Instruct", 
     "Llama-3.1-70B-Instruct": "meta-llama/Llama-3.1-70B-Instruct",
     "Llama-3.3-70B-Instruct": "meta-llama/Llama-3.3-70B-Instruct",

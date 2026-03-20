@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-cd /home/rzh/jialu/sys/SWE-bench
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+cd "$SCRIPT_DIR"
 
 DATASET_NAME=${DATASET_NAME:-princeton-nlp/SWE-bench_Lite}
-PREDICTIONS_PATH=${PREDICTIONS_PATH:-/home/rzh/jialu/sys/SWE-bench/outputs/qwen3.5-9b__SWE-bench_Lite__test.jsonl}
+PREDICTIONS_PATH=${PREDICTIONS_PATH:-$SCRIPT_DIR/outputs/qwen3.5-9b__SWE-bench_Lite__test.jsonl}
 MAX_WORKERS=${MAX_WORKERS:-8}
 RUN_ID=${RUN_ID:-qwen35_9b_eval}
 MODAL=${MODAL:-false}
