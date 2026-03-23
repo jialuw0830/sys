@@ -16,12 +16,12 @@ TEMPERATURE="0.0" # greedy
 TOP_P="1.0"
 TOP_K="32"
 SEQ_LENGTHS=(
-    131072
-    65536
-    32768
-    16384
+    # 131072
+    # 65536
+    # 32768
+    # 16384
     8192
-    4096
+    # 4096
 )
 
 MODEL_SELECT() {
@@ -40,9 +40,9 @@ MODEL_SELECT() {
             MODEL_TEMPLATE_TYPE="qwen-chat"
             MODEL_FRAMEWORK="vllm"
             ;;
-        glm-4.7-flash)
+        glm-4.7-flash|GLM-4.7-Flash)
             MODEL_PATH="${MODEL_DIR}/GLM-4.7-Flash"
-            MODEL_TEMPLATE_TYPE="chatglm-chat"
+            MODEL_TEMPLATE_TYPE="base"
             MODEL_FRAMEWORK="vllm"
             ;;
         llama2-7b-chat)

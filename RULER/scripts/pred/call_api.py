@@ -42,7 +42,18 @@ import time
 from tqdm import tqdm
 from pathlib import Path
 import traceback
-from nemo.collections.asr.parts.utils.manifest_utils import read_manifest
+try:
+    from nemo.collections.asr.parts.utils.manifest_utils import read_manifest
+except Exception:
+    def read_manifest(path):
+        records = []
+        with open(path, 'rt', encoding='utf-8') as fin:
+            for line in fin:
+                line = line.strip()
+                if not line:
+                    continue
+                records.append(json.loads(line))
+        return records
 
 SERVER_TYPES = (
     'trtllm',
@@ -74,6 +85,8 @@ parser.add_argument("--chunk_amount", type=int, default=1, help='size of split c
 parser.add_argument("--server_type", default='nemo', action=ServerAction, choices=SERVER_TYPES)
 parser.add_argument("--server_host", type=str, default='127.0.0.1')
 parser.add_argument("--server_port", type=str, default='5000')
+parser.add_argument("--base_url", type=str, default=None, help='OpenAI-compatible base URL, e.g. http://127.0.0.1:8000/v1')
+parser.add_argument("--api_key", type=str, default='token-abc123', help='API key for OpenAI-compatible endpoint')
 parser.add_argument("--ssh_server", type=str)
 parser.add_argument("--ssh_key_path", type=str)
 parser.add_argument("--model_name_or_path", type=str, default='gpt-3.5-turbo', 
@@ -88,6 +101,7 @@ parser.add_argument("--stop_words", type=str, default='')
 parser.add_argument("--sliding_window_size", type=int)
 parser.add_argument("--threads", type=int, default=4)
 parser.add_argument("--batch_size", type=int, default=1)
+parser.add_argument("--stream", action="store_true", help="Enable streaming mode when supported by the backend client")
 
 args = parser.parse_args()
 args.stop_words = list(filter(None, args.stop_words.split(',')))
@@ -125,6 +139,8 @@ def get_llm(tokens_to_generate):
             random_seed=args.random_seed,
             stop=args.stop_words,
             tokens_to_generate=tokens_to_generate,
+            stream=args.stream,
+            tokenizer_name_or_path=args.model_name_or_path,
         )
 
     elif args.server_type == 'sglang':
@@ -146,6 +162,9 @@ def get_llm(tokens_to_generate):
         from client_wrappers import OpenAIClient
         llm = OpenAIClient(
             model_name=args.model_name_or_path,
+            base_url=args.base_url or f"http://{args.server_host}:{args.server_port}/v1",
+            api_key=args.api_key,
+            stream=args.stream,
             temperature=args.temperature,
             top_k=args.top_k,
             top_p=args.top_p,
@@ -270,6 +289,8 @@ def main():
                 'truncation': truncation,
                 'length': length,
             }
+            if isinstance(pred, dict) and pred.get('stream_metrics') is not None:
+                outputs_parallel[idx]['stream_metrics'] = pred['stream_metrics']
 
     threads = []
     outputs_parallel = [{} for _ in range(len(data))]
@@ -327,6 +348,44 @@ def main():
                 start_idx = end_idx + 1
 
     print(f"Used time: {round((time.time() - start_time) / 60, 1)} minutes")
+
+    if args.stream:
+        stream_metrics = [
+            item.get('stream_metrics')
+            for item in outputs_parallel
+            if isinstance(item, dict) and item.get('stream_metrics') is not None
+        ]
+
+        if len(stream_metrics) > 0:
+            valid_ttft = [m['ttft'] for m in stream_metrics if m.get('ttft') is not None]
+            mean_ttft = (sum(valid_ttft) / len(valid_ttft)) if len(valid_ttft) > 0 else None
+
+            itl_sum = sum(m.get('itl_sum', 0.0) for m in stream_metrics)
+            itl_count = sum(m.get('itl_count', 0) for m in stream_metrics)
+            mean_itl = (itl_sum / itl_count) if itl_count > 0 else None
+
+            total_tokens = sum(m.get('generated_tokens', 0) for m in stream_metrics)
+            window_start = min(m.get('request_start', float('inf')) for m in stream_metrics)
+            window_end = max(m.get('request_end', 0.0) for m in stream_metrics)
+            benchmark_duration = max(window_end - window_start, 1e-9)
+
+            throughput = total_tokens / benchmark_duration
+            samples_per_second = len(stream_metrics) / benchmark_duration
+
+            summary = {
+                'streaming_metrics': {
+                    'requests': len(stream_metrics),
+                    'ttft': mean_ttft,
+                    'itl': mean_itl,
+                    'throughput': throughput,
+                    'samples_per_second': samples_per_second,
+                    'total_generated_tokens': total_tokens,
+                    'benchmark_duration': benchmark_duration,
+                }
+            }
+
+            print("Streaming summary:")
+            print(json.dumps(summary['streaming_metrics'], ensure_ascii=False, indent=2))
 
 
 if __name__ == '__main__':

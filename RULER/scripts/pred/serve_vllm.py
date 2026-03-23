@@ -39,7 +39,7 @@ async def health() -> Response:
     return Response(status_code=200)
 
 
-@app.put("/generate")
+@app.api_route("/generate", methods=["POST", "PUT"])
 async def generate(request: Request) -> Response:
     """Generate completion for the request.
 
@@ -66,7 +66,7 @@ async def generate(request: Request) -> Response:
                 prompt + output.text for output in request_output.outputs
             ]
             ret = {"text": text_outputs}
-            yield (json.dumps(ret) + "\0").encode("utf-8")
+            yield (json.dumps(ret) + "\n").encode("utf-8")
 
     if stream:
         return StreamingResponse(stream_results())

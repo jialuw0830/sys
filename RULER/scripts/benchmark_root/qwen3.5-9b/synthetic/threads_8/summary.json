@@ -1,0 +1,11 @@
+{
+	"model_name": "qwen3.5-9b",
+	"served_model_name": "qwen3.5-9b",
+	"benchmark": "synthetic",
+	"threads": 8,
+	"vllm_max_num_seqs": 128,
+	"total_time_seconds": 244,
+	"stream": 1,
+	"seq_lengths": ["8192"],
+	"generated_at": "2026-03-21T12:24:11Z"
+}

@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-MODEL=${MODEL:-Qwen3.5-27B}
-PORT=${PORT:-8002}
+MODEL=${MODEL:-GLM-4.7-Flash}
+PORT=${PORT:-8003}
 N_PROC=${N_PROC:-1}
 
 export OPENAI_BASE_URL=${OPENAI_BASE_URL:-http://127.0.0.1:${PORT}/v1}

@@ -20,7 +20,7 @@ template_0shot = open('prompts/0shot.txt', encoding='utf-8').read()
 template_0shot_cot = open('prompts/0shot_cot.txt', encoding='utf-8').read()
 template_0shot_cot_ans = open('prompts/0shot_cot_ans.txt', encoding='utf-8').read()
 
-def query_llm(prompt, model, tokenizer, client=None, temperature=0.5, max_new_tokens=128, stop=None):
+def query_llm(prompt, model, tokenizer, client=None, temperature=0.5, max_new_tokens=128, stop=None, enable_thinking=None):
     # truncate
     max_len = maxlen_map[model]
     if model in model_map:
@@ -39,11 +39,20 @@ def query_llm(prompt, model, tokenizer, client=None, temperature=0.5, max_new_to
     while tries < 5:
         tries += 1
         try:
+            req_kwargs = {
+                "model": model,
+                "messages": [{"role": "user", "content": prompt}],
+                "temperature": temperature,
+                "max_tokens": max_new_tokens,
+            }
+            if enable_thinking is not None:
+                req_kwargs["extra_body"] = {
+                    "chat_template_kwargs": {
+                        "enable_thinking": enable_thinking
+                    }
+                }
             completion = client.chat.completions.create(
-                model=model,
-                messages=[{"role": "user", "content": prompt}],
-                temperature=temperature,
-                max_tokens=max_new_tokens,
+                **req_kwargs,
             )
             return completion.choices[0].message.content
         except KeyboardInterrupt as e:
@@ -69,6 +78,7 @@ def extract_answer(response):
 
 def get_pred(data, args, fout):
     model = args.model
+    disable_thinking = ("qwen3.5" in model.lower()) or ("glm-4.7" in model.lower()) or ("glm" in model.lower())
     if "gpt" in model or "o1" in model:
         tokenizer = tiktoken.encoding_for_model("gpt-4o-2024-08-06")
     else:
@@ -92,16 +102,40 @@ def get_pred(data, args, fout):
             template = template_0shot
         prompt = template.replace('$DOC$', context.strip()).replace('$Q$', item['question'].strip()).replace('$C_A$', item['choice_A'].strip()).replace('$C_B$', item['choice_B'].strip()).replace('$C_C$', item['choice_C'].strip()).replace('$C_D$', item['choice_D'].strip())
         if args.cot:
-            output = query_llm(prompt, model, tokenizer, client, temperature=0.1, max_new_tokens=1024)
+            output = query_llm(
+                prompt,
+                model,
+                tokenizer,
+                client,
+                temperature=0.1,
+                max_new_tokens=4096,
+                enable_thinking=False if disable_thinking else None,
+            )
         else:
-            output = query_llm(prompt, model, tokenizer, client, temperature=0.1, max_new_tokens=4096)
+            output = query_llm(
+                prompt,
+                model,
+                tokenizer,
+                client,
+                temperature=0.1,
+                max_new_tokens=4096,
+                enable_thinking=False if disable_thinking else None,
+            )
         if output == '':
             continue
         if args.cot: # extract answer
             response = output.strip()
             item['response_cot'] = response
             prompt = template_0shot_cot_ans.replace('$DOC$', context.strip()).replace('$Q$', item['question'].strip()).replace('$C_A$', item['choice_A'].strip()).replace('$C_B$', item['choice_B'].strip()).replace('$C_C$', item['choice_C'].strip()).replace('$C_D$', item['choice_D'].strip()).replace('$COT$', response)
-            output = query_llm(prompt, model, tokenizer, client, temperature=0.1, max_new_tokens=128)
+            output = query_llm(
+                prompt,
+                model,
+                tokenizer,
+                client,
+                temperature=0.1,
+                max_new_tokens=128,
+                enable_thinking=False if disable_thinking else None,
+            )
             if output == '':
                 continue
         response = output.strip()

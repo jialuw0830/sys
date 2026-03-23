@@ -1,0 +1,10 @@
+{
+	"model_name": "glm-4.7-flash",
+	"served_model_name": "glm-4.7-flash",
+	"benchmark": "synthetic",
+	"max_num_seqs": 128,
+	"total_time_seconds": 17949,
+	"stream": 1,
+	"seq_lengths": ["131072","65536","32768","16384","8192","4096"],
+	"generated_at": "2026-03-21T08:47:31Z"
+}
